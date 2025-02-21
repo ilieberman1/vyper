@@ -142,7 +142,7 @@ def burnFrom(_to: address, _value: uint256):
     self.allowance[_to][msg.sender] -= _value
     self._burn(_to, _value)
 
-## allowed to mint a coin at a certain time each day which cahnges randomly
+## allowed to mint a coin at a certain block number
 
 @external
 def randomBlockMint (_to: address) -> (uint256):
