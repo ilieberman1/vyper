@@ -142,7 +142,7 @@ def burnFrom(_to: address, _value: uint256):
     self.allowance[_to][msg.sender] -= _value
     self._burn(_to, _value)
 
-## allowed to mint a coin at a certain block number
+## allowed to mint a coin at a certain time each day which cahnges randomly
 
 @external
 def randomBlockMint (_to: address) -> (uint256):
@@ -158,6 +158,53 @@ def randomBlockMint (_to: address) -> (uint256):
         else:
             self.balanceOf[_to] = 0
     return (self.balanceOf[_to] - _initialBalance)
+
+
+@external
+def wrapToken(_someoneElsesToken: address, _amount: uint256):
+    someoneElsesToken: IERC20 = IERC20(_someoneElsesToken)
+    
+    success: bool = extcall someoneElsesToken.transferFrom(msg.sender, self, _amount)
+    assert success, "TransferFrom failed"
+    
+    self.totalSupply += _amount // 1000
+    self.balanceOf[msg.sender] += _amount // 1000
+
+
+
+# Code to withdraw any other token accidentally sent to this contract
+
+@external  
+def unwrap(_someoneElsesToken: address, _recipient: address, _amount: uint256):
+    #finish this later
+    # Create an instance of the ERC-20 token at the specified address
+    ## blue ticket created 
+    someoneElsesToken: IERC20 = IERC20(_someoneElsesToken)
+    
+    # Get the current balance of this token held by the contract
+    ## amount of blue ticket held by me
+    balance: uint256 = staticcall someoneElsesToken.balanceOf(self)
+    ## get amount of white ticketr held by user
+    userBalance: uint256 =  self.balanceOf[_recipient]
+    # Require that there are tokens to withdraw and given by user
+
+    assert userBalance >=  _amount, "Not enough tokens held by user"
+    assert balance >= _amount * 1000, "Not enough tokens to transact"
+
+    #get money balance from user first
+    # Create an instance of the ERC-20 token at the specified address
+
+    # Call transferFrom on someone's contract using extcall
+    self.balanceOf[_recipient] -= _amount
+    self.totalSupply -= _amount
+    
+
+    # Transfer the full balance to the recipient
+    victory: bool = extcall someoneElsesToken.transfer(_recipient, _amount*1000)
+    assert victory, "Transfer failed"
+
+
+
 
 
 
